@@ -1,0 +1,80 @@
+# Logs
+logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+lerna-debug.log*
+
+dist
+dist-ssr
+*.local
+
+# Editor directories and files
+.vscode/*
+!.vscode/extensions.json
+.idea
+.DS_Store
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
+plan.txt
+
+# ---------------------------------------------------------------------
+# 1. VARIABLES DE ENTORNO (CRÍTICO: NO SUBIR NUNCA CREDENCIALES)
+# ---------------------------------------------------------------------
+
+# Ignora el archivo de configuración .env en cualquier subdirectorio
+.env
+# Ignora cualquier archivo de entorno específico que uses en local
+.env.local
+.env.*.local
+
+# ---------------------------------------------------------------------
+# 2. DEPENDENCIAS Y CACHÉ DEL GESTOR DE PAQUETES (Node.js/Python)
+# ---------------------------------------------------------------------
+
+# Carpetas de dependencias de Node.js (Frontend y Backend si usas Node)
+node_modules/
+# Archivos de caché de Node.js
+.npm/
+.yarn/
+
+# Entorno virtual de Python (Backend)
+venv/
+.venv/
+__pycache__/
+*.pyc
+*.swp
+*.sqlite3 # Si usas SQLite3 en desarrollo
+
+# ---------------------------------------------------------------------
+# 3. ARCHIVOS DE COMPILACIÓN Y BUILD (Frontend y Backend)
+# ---------------------------------------------------------------------
+
+# Build de Vite/Frontend
+/frontend/dist/
+/frontend/out/
+# Build de Django/Backend
+/backend/dist/
+/backend/build/
+
+# ---------------------------------------------------------------------
+# 4. ARCHIVOS ESPECÍFICOS DE SISTEMAS Y EDITORES
+# ---------------------------------------------------------------------
+
+# macOS
+# macOS
+
+# Visual Studio Code
+# Logs y Debug
+*.log
+npm-debug.log*
+# 5. ARCHIVOS DE MEDIOS (MEDIA FILES)
+# ---------------------------------------------------------------------
+
+# Si Django gestiona subidas de archivos de usuario, esta carpeta debe ignorarse
+/backend/media/

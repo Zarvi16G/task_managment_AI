@@ -1,0 +1,104 @@
+import { tasksApi } from "../api/client";
+import { useState } from "react";
+
+interface FormField {
+  name: string; // El nombre clave (ej: "firstName", "email")
+  label: string; // El texto visible (ej: "Nombre")
+  type: "text" | "email" | "password" | "number"; // El tipo de input
+  placeholder?: string; // Opcional
+}
+
+interface DynamicFormProps {
+  fields: FormField[]; // ¡Aquí está tu array de props!
+  onSubmit: (data: Record<string, string>) => void; // Una función para manejar el envío
+}
+
+const signUpFields: FormField[] = [
+  { name: "email", label: "Email", type: "email" },
+  { name: "first_name", label: "Name", type: "text" },
+  { name: "last_name", label: "Last name", type: "text" },
+  { name: "phone_number", label: "Phone", type: "number" },
+  {
+    name: "birth_date",
+    label: "Birth Date",
+    type: "text",
+    placeholder: "YYYY-MM-DD",
+  },
+  {
+    name: "password",
+    label: "Password",
+    type: "password",
+    placeholder: "******",
+  },
+];
+
+const DynamicForm: React.FC<DynamicFormProps> = ({ fields, onSubmit }) => {
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    // if (!isValidElement(formData)) {
+    //   return;
+    // }
+
+    // ✅ La CLAVE: Llama a la función del padre (SignUpPage)
+    // y le pasa los datos limpios y validados.
+    onSubmit(formData);
+  };
+  const [formData, setFormData] = useState<Record<string, string>>({});
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setFormData({ ...formData, [e.target.name]: e.target.value });
+  };
+  return (
+    <div className="flex items-center justify-center min-h-screen bg-[#000C19]">
+      <div className="bg-[#CAEAFF] p-10 rounded-xl shadow-2xl w-full max-w-md transform transition-transform duration-300">
+        <form onSubmit={handleSubmit} className="space-y-6">
+          {/* ¡Iteras sobre el array de props para renderizar! */}
+          <h1 className="text-4xl text-center text-[#2B6CDD] font-bold font-sans p-2 mb-6 border-b border-gray-300">
+            Create an account
+          </h1>
+          {fields.map((field) => (
+            <div key={field.name}>
+              <label
+                htmlFor={field.name}
+                className="block text-sm font-medium text-gray-700 mb-1"
+              >
+                {field.label}
+              </label>
+              <input
+                id={field.name}
+                name={field.name}
+                type={field.type}
+                placeholder={field.placeholder}
+                value={formData[field.name] || ""}
+                onChange={handleChange}
+                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#4DA8E4] focus:border-[#4DA8E4] transition duration-150 text-[#000C19]"
+                // ... otros atributos (value, onChange)
+              />
+            </div>
+          ))}
+          <button
+            type="submit"
+            className="w-full bg-[#4DA8E4] text-white py-3 mt-4 rounded-full font-semibold text-lg transform transition-all duration-200 hover:bg-[#2B6CDD] hover:scale-[1.02] shadow-lg"
+          >
+            Sign Up
+          </button>
+        </form>
+      </div>
+    </div>
+  );
+};
+
+const SignUpPage = () => {
+  const handleSignUp = async (data: Record<string, string>) => {
+    console.log("Datos enviados:", data);
+    try {
+      const response = await tasksApi.post("backend/api/signup/", data);
+      console.log("Signup successful:", response);
+    } catch (error) {
+      console.error("Signup failed:", error);
+    }
+  };
+
+  return <DynamicForm fields={signUpFields} onSubmit={handleSignUp} />;
+};
+
+export default SignUpPage;
