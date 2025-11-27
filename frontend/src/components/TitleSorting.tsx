@@ -1,14 +1,10 @@
-import type { SortControlsProps, CreateTaskProps } from "./types/Task";
-import { usehandleCreateTask } from "./hooks/useCreateTask";
+import type { SortControlsProps } from "./types/Task";
 import React from "react";
 
-const TitleSorting: React.FC<SortControlsProps> = ({
-  onSort,
-  currentSortKey,
-}) => {
+const TitleSorting: React.FC<SortControlsProps> = ({ onSort, onNewTask }) => {
   return (
     <div className="grid grid-cols-12 p-4 bg-[#001E3C] rounded-md">
-      <button className="col-span-1" onClick={usehandleCreateTask}>
+      <button className="col-span-1" onClick={onNewTask}>
         +
       </button>
       <h3 className="col-span-5 text-center">Title</h3>

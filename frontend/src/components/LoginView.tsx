@@ -27,10 +27,6 @@ export default function LoginView() {
     }
   };
 
-  const goToSignUp = () => {
-    window.location.href = "/signup";
-  };
-
   return (
     // 4. Corrected return syntax and onSubmit handler
     <div className="flex items-center justify-center min-h-screen bg-[#000C19]">
@@ -58,7 +54,7 @@ export default function LoginView() {
               htmlFor="email"
               className="block text-sm font-medium text-gray-700 mb-1"
             >
-              email
+              Email
             </label>
             <input
               id="email"
@@ -102,16 +98,8 @@ export default function LoginView() {
 
           {/* Secondary element: Register button using the bright accent color */}
           <p className="text-center text-sm pt-4 text-[#2B6CDD] font-medium">
-            Don't have an account?
+            <a href="/signup">Don't have an account?</a>
           </p>
-          <button
-            type="button"
-            onClick={goToSignUp}
-            // Secondary button style using the bright accent color from your task list (#00FDA4)
-            className="w-full text-[#000C19] bg-[#00FDA4] py-2 rounded-full font-bold text-md transform transition-all duration-200 hover:bg-[#4DA8E4] hover:scale-105 shadow-md"
-          >
-            Sign up
-          </button>
         </form>
       </div>
     </div>

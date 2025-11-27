@@ -4,6 +4,7 @@ import { Route, Routes, Navigate } from "react-router-dom";
 import { useAuth } from "./context/AuthContext";
 import TaskGUI from "./components/TaskGUI";
 import SignUpPage from "./components/SignUp";
+import UserSettings from "./components/UserSettings";
 
 function App() {
   const { isLoggedIn, isLoading } = useAuth();
@@ -30,6 +31,10 @@ function App() {
         <Route
           path="/signup"
           element={isLoggedIn ? <Navigate to="/tasks" /> : <SignUpPage />}
+        />
+        <Route
+          path="/personal-information"
+          element={isLoggedIn ? <UserSettings /> : <Navigate to="/login" />}
         />
       </Routes>
     </div>

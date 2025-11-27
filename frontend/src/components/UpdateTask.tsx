@@ -1,10 +1,7 @@
 import type { UpdateTaskProps } from "./types/Task";
+import DeleteTask from "./DeleteTask";
 
-export const UpdateTask: React.FC<UpdateTaskProps> = ({
-  task,
-  onUpdateTask,
-  onDeleteTask,
-}) => {
+function UpdateTask({ id, task, onUpdateTask, onDeleteTask }: UpdateTaskProps) {
   const handleFieldChange = (
     event: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
   ) => {
@@ -34,9 +31,13 @@ export const UpdateTask: React.FC<UpdateTaskProps> = ({
       : "bg-green-500/10 text-green-400";
 
   return (
-    <div className="grid grid-cols-10 gap-2 p-2 border-b border-gray-700 hover:bg-gray-800 transition-colors">
+    <div className="grid grid-cols-11 col-span-11">
       {/* Col 1: Checkbox de Completado */}
-      <div className="col-span-1 flex items-center justify-center">
+      <div
+        className={`col-span-1 gap-1 items-center px-4 py-2 border-b rounded-md border-gray-700/50 group transition-all ${
+          task.completed ? "opacity-50" : "" // Reduce opacidad si está completada
+        }`}
+      >
         <input
           type="checkbox"
           name="completed"
@@ -47,9 +48,8 @@ export const UpdateTask: React.FC<UpdateTaskProps> = ({
                      focus:outline-none focus:ring-2 focus:ring-[#00FDA4] focus:ring-offset-2 focus:ring-offset-[#001E3C]"
         />
       </div>
-
       {/* Col 2: Título de la Tarea (Editable) */}
-      <div className="col-span-5">
+      <div className="col-span-4">
         <input
           type="text"
           name="title"
@@ -61,10 +61,8 @@ export const UpdateTask: React.FC<UpdateTaskProps> = ({
           placeholder="Nombre de la tarea"
         />
       </div>
-
       {/* Col 3: Prioridad (Selector Editable) */}
       <div className="col-span-2">
-        {/* Usamos String(task.priority) porque el 'value' del select es siempre un string */}
         <select
           name="priority"
           value={String(task.priority)}
@@ -72,7 +70,6 @@ export const UpdateTask: React.FC<UpdateTaskProps> = ({
           className={`w-full rounded-md px-2 py-1 text-xs font-bold border-0 outline-none focus:ring-2 focus:ring-[#00FDA4] transition-all 
             ${getPriorityClasses(task.priority)}`}
         >
-          {/* El valor 'value' es el string que se evalúa en handleFieldChange */}
           <option value="true" className="font-bold text-red-500 bg-gray-800">
             HIGH
           </option>
@@ -84,29 +81,19 @@ export const UpdateTask: React.FC<UpdateTaskProps> = ({
           </option>
         </select>
       </div>
-
       {/* Col 4: Fecha de Vencimiento (Editable) */}
       <div className="col-span-2">
         <input
           type="date"
           name="due_date"
-          // Asegúrate de que task.due_date sea una cadena "YYYY-MM-DD" o ajusta
           value={task.due_date || ""}
           onChange={handleFieldChange}
           className="bg-transparent text-sm text-gray-400 p-1 rounded-md outline-none focus:bg-gray-800/50 hover:bg-gray-800/50 w-full"
           style={{ colorScheme: "dark" }}
         />
       </div>
-      {/* Col 5: Acción de Eliminar */}
-      <div className="col-span-2 flex justify-end">
-        <button
-          onClick={() => onDeleteTask(task)}
-          className="p-2 rounded-lg text-gray-500 hover:text-red-400 hover:bg-red-500/10 transition-colors opacity-50 group-hover:opacity-100"
-          title="Eliminar Tarea"
-        >
-          🗑️
-        </button>
-      </div>
+      <DeleteTask id={id} onDeleteTask={onDeleteTask} />
     </div>
   );
-};
+}
+export default UpdateTask;

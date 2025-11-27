@@ -3,10 +3,10 @@ import {
   SortableContext,
   verticalListSortingStrategy,
 } from "@dnd-kit/sortable";
-import SortableTask from "./SortableTask";
 import TitleSorting from "./TitleSorting";
 import Statistics from "./Statistics";
 import Header from "./Header";
+import DragGUI from "./DragGUI";
 import { useTasks } from "./hooks/useTasks";
 
 export default function TaskGUI() {
@@ -15,10 +15,10 @@ export default function TaskGUI() {
     sortedTasks,
     handleSort,
     sortConfig,
-    handleCreateTask,
-    handleUpdateTask,
-    handleDeleteTask,
     handleDragEnd,
+    handleDeleteTask,
+    handleUpdateTask,
+    handleNewTask,
   } = useTasks();
 
   return (
@@ -33,6 +33,7 @@ export default function TaskGUI() {
           <TitleSorting
             onSort={handleSort}
             currentSortKey={sortConfig?.key || null}
+            onNewTask={handleNewTask}
           />
           <DndContext onDragEnd={handleDragEnd}>
             <SortableContext
@@ -40,7 +41,7 @@ export default function TaskGUI() {
               strategy={verticalListSortingStrategy}
             >
               {sortedTasks.map((task) => (
-                <SortableTask
+                <DragGUI
                   key={task.task_id}
                   id={task.task_id}
                   task={task}

@@ -1,18 +1,9 @@
-import React from "react";
 import { useSortable } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
-import type { UpdateTaskProps } from "./types/Task";
-import { UpdateTask } from "./UpdateTask";
-import { useUpdateTask } from "./hooks/useUpdateTask";
-// ============================================
-// ---           COMPONENTE               ---
-// ============================================
+import type { dragGUIProps } from "./types/Task";
+import UpdateTask from "./UpdateTask";
 
-const SortableTask: React.FC<UpdateTaskProps> = ({
-  id,
-  task,
-  onDeleteTask,
-}) => {
+const DragGUI = ({ id, task, onUpdateTask, onDeleteTask }: dragGUIProps) => {
   // --- 1. HOOKS de DND-Kit ---
   const {
     attributes,
@@ -37,12 +28,9 @@ const SortableTask: React.FC<UpdateTaskProps> = ({
     <div
       ref={setNodeRef}
       style={style}
-      className={`grid gap-1 items-center px-4 py-2 border-b rounded-md border-gray-700/50 group transition-all ${
-        task.completed ? "opacity-50" : "" // Reduce opacidad si está completada
-      }`}
+      className="grid grid-cols-12 bg-[#001E3C] p-2 border-b border-gray-700 hover:bg-gray-800 transition-colors"
     >
-      {/* Col 1: Drag Handle (::) y Checkbox de Completado */}
-
+      {/* Col 1: Drag Handle (::)*/}
       <button
         {...attributes}
         {...listeners}
@@ -51,9 +39,14 @@ const SortableTask: React.FC<UpdateTaskProps> = ({
       >
         <span className="text-xl leading-none">::</span>
       </button>
-      <UpdateTask task={task} onUpdateTask={useUpdateTask} />
+      <UpdateTask
+        id={id}
+        task={task}
+        onUpdateTask={onUpdateTask}
+        onDeleteTask={onDeleteTask}
+      />
     </div>
   );
 };
 
-export default SortableTask;
+export default DragGUI;

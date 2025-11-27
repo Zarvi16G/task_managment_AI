@@ -1,4 +1,4 @@
-import { tasksApi } from "../api/client";
+import { signup, login } from "../api/client";
 import { useState } from "react";
 
 interface FormField {
@@ -81,6 +81,9 @@ const DynamicForm: React.FC<DynamicFormProps> = ({ fields, onSubmit }) => {
           >
             Sign Up
           </button>
+          <p className="text-center text-sm pt-4 text-[#2B6CDD] font-medium">
+            <a href="/login">You have account already?</a>
+          </p>
         </form>
       </div>
     </div>
@@ -91,8 +94,12 @@ const SignUpPage = () => {
   const handleSignUp = async (data: Record<string, string>) => {
     console.log("Datos enviados:", data);
     try {
-      const response = await tasksApi.post("backend/api/signup/", data);
+      const response = await signup(data);
       console.log("Signup successful:", response);
+      if (response.status === 201) {
+        await login(data.email, data.password);
+        window.location.href = "/tasks";
+      }
     } catch (error) {
       console.error("Signup failed:", error);
     }

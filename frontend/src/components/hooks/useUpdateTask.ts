@@ -1,10 +1,12 @@
-import { useState } from "react";
 import type { Task } from "../types/Task";
 import { updatedTask, reorderTasks } from "../../api/client";
 
 // Hook para manejar actualizaciones y reordenamientos
-export function useUpdateTask(initialTasks: Task[]) {
-  const [tasks, setTasks] = useState<Task[]>(initialTasks);
+export function useUpdateTask(
+  tasks: Task[],
+  setTasks: React.Dispatch<React.SetStateAction<Task[]>>
+) {
+  // const [tasks, setTasks] = useState<Task[]>(initialTasks);
 
   // ✅ Actualizar una tarea específica
   const handleUpdateTask = async (editedTask: Task) => {
