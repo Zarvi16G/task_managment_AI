@@ -1,48 +1,65 @@
 from rest_framework_simplejwt.views import TokenObtainPairView, TokenRefreshView
+from rest_framework_simplejwt.tokens import RefreshToken
 from rest_framework.views import APIView
-from rest_framework.response import Response
-from django.conf import settings
 from rest_framework.permissions import IsAuthenticated, AllowAny
-from api_tasks.api.serializer import CookieTokenObtainPairSerializer, jwt_set_cookie, TaskSerializer, CreateUserSerializer
-from .models import Task, CustomUser
+from rest_framework.response import Response
+from rest_framework.generics import RetrieveUpdateDestroyAPIView
 from rest_framework import status
+from django.conf import settings
+from .models import Task, CustomUser
+from api_tasks.api.serializer import TaskSerializer, CreateUserSerializer, LoginUserSerializer
 
-# --- 1. Vista de LOGIN personalizada ---
-class CookieTokenObtainPairView(TokenObtainPairView):
-    """Vista que maneja el login y establece los tokens en cookies."""
-    serializer_class = CookieTokenObtainPairSerializer
-    
-    def post(self, request, *args, **kwargs):
-        serializer = self.get_serializer(data=request.data)
 
-        try:
-            print("Request data received for login:", request.data)
-            serializer.is_valid(raise_exception=True)
-        except Exception as e:
-            return Response({'detail': str(e)}, status=400)
-
-        # La data contiene solo el mensaje de éxito (sin tokens)
-        response = Response(serializer.data, status=200)
-        print("Serializer data after validation:", serializer.data)
-
-        # 💥 Establece las cookies en la respuesta HTTP
-        access_token = serializer.access_token
-        refresh_token = serializer.refresh_token
+class CookieTokenRefreshView(TokenRefreshView):
+    def post(self, request):
+        cookie_name = settings.SIMPLE_JWT.get('AUTH_COOKIE_REFRESH', 'refresh') 
+        refresh_token = request.COOKIES.get(cookie_name)
         
-        jwt_set_cookie(
-            response, 
-            access_token, 
-            settings.SIMPLE_JWT['AUTH_COOKIE'], 
-            settings.SIMPLE_JWT['ACCESS_TOKEN_LIFETIME'].total_seconds()
-        )
-        jwt_set_cookie(
-            response, 
-            refresh_token, 
-            settings.SIMPLE_JWT['AUTH_COOKIE_REFRESH'], 
-            settings.SIMPLE_JWT['REFRESH_TOKEN_LIFETIME'].total_seconds()
-        )
+        if not refresh_token:
+            return Response({"error":"Refresh token not provided"}, status= status.HTTP_401_UNAUTHORIZED)
+    
+        try:
+            refresh = RefreshToken(refresh_token)
+            access_token = str(refresh.access_token)
+            
+            response = Response({"message": "Access token token refreshed successfully"}, status=status.HTTP_200_OK)
+            response.set_cookie(key=settings.SIMPLE_JWT.get('AUTH_COOKIE', 'access'),
+                                value=access_token,
+                                httponly=True,
+                                secure=True,
+                                samesite="None")
+            return response
+        except InvalidToken:
+            return Response({"error":"Invalid token"}, status=status.HTTP_401_UNAUTHORIZED)
 
-        return response
+class LoginView(APIView):
+    permission_classes = [AllowAny]
+    def post(self, request):
+        serializer = LoginUserSerializer(data=request.data)
+        
+        if serializer.is_valid():
+            user = serializer.validated_data
+            refresh = RefreshToken.for_user(user)
+            access_token = str(refresh.access_token)
+            
+            response = Response({
+                "user": CreateUserSerializer(user).data},
+                                status=status.HTTP_200_OK)
+            
+            response.set_cookie(key=settings.SIMPLE_JWT.get('AUTH_COOKIE', 'access'),
+                                value=access_token,
+                                httponly=True,
+                                secure=True,
+                                samesite="None")
+            
+            response.set_cookie(key=settings.SIMPLE_JWT.get('AUTH_COOKIE_REFRESH', 'refresh'),
+                                value=str(refresh),
+                                httponly=True,
+                                secure=True,
+                                samesite="None")
+            return response
+        return Response( serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
 
 class SignupView(APIView):
     """Vista para registrar nuevos usuarios."""
@@ -74,14 +91,11 @@ class LogoutView(APIView):
 
 class CreateNewTaskView(APIView):
     def post(self, request, format=None):
-        #user instance for testing purpose
-        user =  CustomUser.objects.create(id=2, email='testing@mail.com', first_name='Test', last_name='User', birth_date=('2025-11-11'), phone_number='1234567890')
         permission_classes = [IsAuthenticated]
         try:
             new_task = Task.objects.create(
                 title="Nueva Tarea Sin Título",
-                user=user
-                # user=request.user, # Descomentar en un entorno real donde request.user esté disponible
+                user=request.user,
             )
             serializer = TaskSerializer(new_task)
             return Response(serializer.data, status=status.HTTP_201_CREATED)
@@ -90,3 +104,28 @@ class CreateNewTaskView(APIView):
              print(f"Error durante la creación: {e}")
              return Response({"detail": "Error interno del servidor."}, 
                             status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+class GetUser(RetrieveUpdateDestroyAPIView):
+    permission_classes = [IsAuthenticated]
+    serializer_class = CreateUserSerializer
+
+    def get_object(self):
+        return self.request.user
+
+    def patch(self, request, *args, **kwargs):
+        user_pk = self.kwargs['pk']
+        try:
+            instance = CustomUser.objects.get(pk=user_pk)
+        except CustomUser.DoesNotExist:
+            return Response({"detail": "No encontrado."}, status=status.HTTP_404_NOT_FOUND)
+
+        print("Datos recibidos (PATCH):", request.data) 
+        
+        serializer = self.get_serializer(instance, data=request.data, partial=True)
+        
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data)
+        
+        print("Errores del Serializador:", serializer.errors) 
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)

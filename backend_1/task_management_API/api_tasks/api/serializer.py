@@ -1,9 +1,6 @@
 from rest_framework import serializers
-from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
-from rest_framework_simplejwt.settings import api_settings
-from rest_framework.response import Response
-from django.conf import settings
-
+from rest_framework.serializers import Serializer
+from django.contrib.auth import authenticate
 from ..models import CustomUser, Task
 
 class CreateUserSerializer(serializers.ModelSerializer):
@@ -46,40 +43,12 @@ class TaskSerializer(serializers.ModelSerializer):
         model = Task
         fields = ['task_id', 'title', 'completed', 'priority', 'due_date', 'position', 'user']
 
-class CookieTokenObtainPairSerializer(TokenObtainPairSerializer):
-    """
-    Sobreescribe el serializer para enviar tokens como cookies HttpOnly.
-    """
+class LoginUserSerializer(Serializer):
+    email = serializers.EmailField(required=True)
+    password = serializers.CharField(write_only=True)
     
-    @classmethod
-    def get_token(cls, user):
-        # Llama a la lógica base para crear los tokens Access y Refresh
-        return super().get_token(user)
-
-    def validate(self, attrs):
-        # Llama al validate base para obtener los tokens en la respuesta
-        data = super().validate(attrs)
-
-        self.access_token = data.get('access')
-        self.refresh_token = data.get('refresh')
-        
-        # Eliminar los tokens del cuerpo JSON de la respuesta
-        del data['access']
-        del data['refresh']
-        
-        # Añadir un mensaje de éxito para que el frontend sepa que funcionó
-        data['success'] = 'Login exitoso' 
-        
-        return data
-
-# Función utilitaria para configurar las cookies
-def jwt_set_cookie(response, token, cookie_name, max_age):
-    """Establece la cookie con los parámetros HttpOnly y Secure."""
-    response.set_cookie(
-        key=cookie_name,
-        value=token,
-        max_age=max_age,
-        secure=settings.SIMPLE_JWT['AUTH_COOKIE_SECURE'],
-        httponly=settings.SIMPLE_JWT['AUTH_COOKIE_HTTP_ONLY'],
-        samesite=settings.SIMPLE_JWT['AUTH_COOKIE_SAMESITE'],
-    )
+    def validate(self, data):
+        user = authenticate(**data)
+        if user and user.is_active:
+            return user
+        raise serializers.ValidationError("Incorrect credentials!")

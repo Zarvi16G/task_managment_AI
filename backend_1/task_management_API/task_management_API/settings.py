@@ -60,8 +60,8 @@ MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
     'corsheaders.middleware.CorsMiddleware',
     'django.middleware.common.CommonMiddleware',
-    'django.contrib.sessions.middleware.SessionMiddleware',
-    'django.contrib.auth.middleware.AuthenticationMiddleware',
+    # 'django.contrib.sessions.middleware.SessionMiddleware',
+    # 'django.contrib.auth.middleware.AuthenticationMiddleware',
     # 'django.middleware.csrf.CsrfViewMiddleware',
     # 'django.contrib.messages.middleware.MessageMiddleware',
     # 'django.middleware.clickjacking.XFrameOptionsMiddleware',
@@ -156,7 +156,8 @@ CORS_ALLOW_CREDENTIALS = True
 # REST Framework & JWT Configuration
 
 REST_FRAMEWORK = {
-    'DEFAULT_AUTHENTICATION_CLASSES': (
+     'DEFAULT_AUTHENTICATION_CLASSES': (
+    
         'api_tasks.authentication.CustomCookieJWTAuthentication',
     ),
     'DEFAULT_PERMISSION_CLASSES': (
