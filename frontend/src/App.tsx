@@ -13,7 +13,7 @@ function App() {
     return <div>Cargando...</div>;
   }
   return (
-    <div className="bg-[#000C19] w-full h-full">
+    <div className="bg-[#000C19] w-full h-full pb-10">
       <Routes>
         {/* RUTA DE LOGIN */}
         <Route

@@ -14,13 +14,14 @@ class CookieTokenRefreshView(TokenRefreshView):
     def post(self, request):
         cookie_name = settings.SIMPLE_JWT.get('AUTH_COOKIE_REFRESH', 'refresh') 
         refresh_token = request.COOKIES.get(cookie_name)
-        
+        print("se esta activando cookierefresfview")
         if not refresh_token:
             return Response({"error":"Refresh token not provided"}, status= status.HTTP_401_UNAUTHORIZED)
     
         try:
             refresh = RefreshToken(refresh_token)
             access_token = str(refresh.access_token)
+            print(access_token)
             
             response = Response({"message": "Access token token refreshed successfully"}, status=status.HTTP_200_OK)
             response.set_cookie(key=settings.SIMPLE_JWT.get('AUTH_COOKIE', 'access'),
@@ -33,10 +34,12 @@ class CookieTokenRefreshView(TokenRefreshView):
             return Response({"error":"Invalid token"}, status=status.HTTP_401_UNAUTHORIZED)
 
 class LoginView(APIView):
+    authentication_classes = ()
     permission_classes = [AllowAny]
     def post(self, request):
         serializer = LoginUserSerializer(data=request.data)
         
+        print("activando login")
         if serializer.is_valid():
             user = serializer.validated_data
             refresh = RefreshToken.for_user(user)

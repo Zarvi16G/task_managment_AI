@@ -10,5 +10,6 @@ class TaskViewSet(viewsets.ModelViewSet):
 
     def get_queryset(self):
         user = self.request.user
-        return Task.objects.filter(pk=user.pk)
+        tasks = Task.objects.filter(user=user.id)
+        return  tasks
 
